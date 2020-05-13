@@ -13,6 +13,21 @@ import (
 	"github.com/inancgumus/screen"
 )
 
+func valInterpret(value string) string {
+	switch value {
+	case "1":
+		return "Ace"
+	case "11":
+		return "Jack"
+	case "12":
+		return "Queen"
+	case "13":
+		return "King"
+	default:
+		return value
+	}
+}
+
 func sumSlice(slice []int) int {
 	total := 0
 	for _, sliceT := range slice {
@@ -53,7 +68,7 @@ func getDeck() (string, int) {
 	myVal2 := randFromSliceInt(vals)
 
 	myDeckT := sumSlice([]int{myVal1, myVal2})
-	myDeckVis := strconv.Itoa(myVal1) + " of " + mySuit1 + ", " + strconv.Itoa(myVal2) + " of " + mySuit2
+	myDeckVis := valInterpret(strconv.Itoa(myVal1)) + " of " + mySuit1 + ", " + valInterpret(strconv.Itoa(myVal2)) + " of " + mySuit2
 
 	return myDeckVis, myDeckT
 }
@@ -65,9 +80,12 @@ func main() {
 	screen.MoveTopLeft()
 
 	accent := color.New(color.FgCyan)
+	success := color.New(color.FgGreen)
+	fail := color.New(color.FgRed)
+	info := color.New(color.FgYellow)
 
 	accent.Printf("NOTE: ")
-	fmt.Printf("This program is not endorsing gambling in any way. This is just a fun Golang project. Be respoonsible.\n")
+	fmt.Printf("This program is not endorsing gambling in any way. This is just a fun Golang project. Be responsible.\n")
 	fmt.Println("Also, this is just how I've seen people play blackjack, not exactly sure if it's super accurate :)")
 	fmt.Println()
 
@@ -75,7 +93,7 @@ func main() {
 	compScore := 0
 
 Init:
-	fmt.Println("Blackjack! Computer: "+strconv.Itoa(compScore), "You: "+strconv.Itoa(userScore))
+	info.Println("Blackjack! Computer: "+strconv.Itoa(compScore), "You: "+strconv.Itoa(userScore))
 	fmt.Println()
 
 	fmt.Print("Press 'Enter' to start! ")
@@ -99,7 +117,7 @@ Init:
 	if uDeckT > 21 {
 		var restart string
 		fmt.Println()
-		fmt.Println("Oh no! You busted :(")
+		fail.Println("Oh no! You busted :(")
 		fmt.Print("Wanna play again? (y/n): ")
 		fmt.Scanln(&restart)
 
@@ -119,7 +137,7 @@ Init:
 	if cDeckT > 21 {
 		var restart string
 		fmt.Println()
-		fmt.Println("Woohoo! The computer busted!")
+		success.Println("Woohoo! The computer busted!")
 		fmt.Print("Wanna play again? (y/n): ")
 		fmt.Scanln(&restart)
 
@@ -147,12 +165,12 @@ Init:
 		switch move {
 		case "H":
 			draw, drawV := drawCard()
-			myDraw := "You drew a " + strconv.Itoa(drawV) + " of " + draw + "."
+			myDraw := "You drew a " + valInterpret(strconv.Itoa(drawV)) + " of " + draw + "."
 			fmt.Println(myDraw)
 
 			fmt.Println()
 
-			uDeckVP += ", " + strconv.Itoa(drawV) + " of " + draw
+			uDeckVP += ", " + valInterpret(strconv.Itoa(drawV)) + " of " + draw
 			uDeckT += drawV
 			uDeckTP = "Deck value: " + strconv.Itoa(uDeckT)
 			fmt.Println(uDeckVP)
@@ -161,7 +179,7 @@ Init:
 
 			if uDeckT > 21 && !cStood {
 				var restart string
-				fmt.Println("Oh no! You busted :(")
+				fail.Println("Oh no! You busted :(")
 				fmt.Print("Wanna play again? (y/n): ")
 				fmt.Scanln(&restart)
 
@@ -181,7 +199,7 @@ Init:
 			if cDeckT > 21 {
 				var restart string
 
-				fmt.Println("Woohoo! The computer busted!")
+				success.Println("Woohoo! The computer busted!")
 				fmt.Println("Computer's deck: " + cDeckVP)
 				fmt.Print("Wanna play again? (y/n): ")
 				fmt.Scanln(&restart)
@@ -199,17 +217,18 @@ Init:
 				}
 			} else if cDeckT < 17 {
 				cDraw, cDrawV := drawCard()
-				cDeckVP += ", " + strconv.Itoa(cDrawV) + " of " + cDraw
+				cDeckVP += ", " + valInterpret(strconv.Itoa(cDrawV)) + " of " + cDraw
 				cDeckT += cDrawV
 			} else {
-				fmt.Println("Computer stands.")
+				info.Println("Computer stands.")
+				fmt.Println()
 			}
 
 		case "S":
 			if cDeckT > uDeckT {
 				var restart string
 
-				fmt.Println("Oh no! The computer won :(")
+				fail.Println("Oh no! The computer won :(")
 				fmt.Println("Computer's deck: " + cDeckV)
 				fmt.Print("Wanna play again? (y/n): ")
 				fmt.Scanln(&restart)
@@ -225,10 +244,10 @@ Init:
 					compScore++
 					goto Init
 				}
-			} else {
+			} else if cDeckT < uDeckT {
 				var restart string
 
-				fmt.Println("Woohoo! You won!")
+				success.Println("Woohoo! You won!")
 				fmt.Println("Computer's deck: " + cDeckV)
 				fmt.Print("Wanna play again? (y/n): ")
 				fmt.Scanln(&restart)
@@ -242,11 +261,26 @@ Init:
 					userScore++
 					goto Init
 				}
+			} else if cDeckT == uDeckT {
+				var restart string
+
+				info.Println("What are the chances! You tied!")
+				fmt.Println("Computer's deck: " + cDeckV)
+				fmt.Print("Wanna play again? (y/n): ")
+				fmt.Scanln(&restart)
+
+				if strings.TrimRight(restart, "\n") == "y" {
+					fmt.Println()
+					goto Init
+				} else {
+					fmt.Println()
+					goto Init
+				}
 			}
 		case "F":
 			var restart string
 
-			fmt.Println("Oh no! The computer won :(")
+			fail.Println("Oh no! The computer won :(")
 			fmt.Println("Computer's deck: " + cDeckV)
 			fmt.Print("Wanna play again? (y/n): ")
 			fmt.Scanln(&restart)
