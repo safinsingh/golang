@@ -31,7 +31,7 @@ func main() {
 			var num1 float32
 			var num2 float32
 
-			fmt.Print("Nice! Let's do some divison.\n")
+			fmt.Print("Nice! Let's do some division.\n")
 			fmt.Print("Enter your first number: ")
 			fmt.Scanln(&num1)
 			fmt.Print("Enter your second number: ")
